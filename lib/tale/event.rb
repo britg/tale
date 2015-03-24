@@ -6,10 +6,13 @@ module Tale
                   :dialogue,
                   :character_ref,
                   :actions,
-                  :results
+                  :results,
+                  :sequence
 
     def initialize _opts = {}, &block
       @opts = _opts
+      @actions = []
+      @results = []
       instance_eval(&block)
     end
 
@@ -26,13 +29,23 @@ module Tale
     end
 
     def action key, hash
-      @actions ||= []
       @actions << { key: key }.merge(hash)
     end
 
     def result type, metadata = {}
-      @results ||= []
       @results << { type: type }.merge(metadata)
+    end
+
+    def no_actions?
+      @actions.empty?
+    end
+
+    def has_actions?
+      @actions.any?
+    end
+
+    def action_required?
+      has_actions?
     end
 
   end

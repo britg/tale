@@ -16,25 +16,66 @@ module Tale
     def self.event opts = {}, &block
       @@events ||= []
       e = Tale::Event.new(opts, &block)
+      e.sequence = @@events.count
       @@events << e
       e
     end
 
-    attr_accessor :character
+    attr_accessor :protagonist
 
-    # Character must have two properties:
+    # Protagonist must have two properties:
     # current_chapter_sequence
     # current_event_sequence
 
-    def initialize _character
-      @character = _character
-      @current_event_index = 0
+    def initialize _protagonist
+      @protagonist = _protagonist
     end
 
-    def next
-      @event = @@events[@current_event_index]
-      @current_event_index += 1
-      @event
+    def current_event
+      @@events[current_event_sequence]
+    end
+
+    def next_event
+      @@events[next_event_sequence]
+    end
+
+    def current_event_sequence
+      @protagonist.current_event_sequence || 0
+    end
+
+    def next_event_sequence
+      current_event_sequence + 1
+    end
+
+    def next_event_group
+      return [] if current_event.has_actions?
+
+      @event_group = []
+      i = current_event_sequence
+      loop do
+        i += 1
+        event = @@events[i]
+        @event_group << event
+
+        if event.has_actions?
+          break
+        end
+      end
+
+      @event_group
+    end
+
+    def proceed!
+      @group = next_event_group
+      if @group.any?
+        last_event = @group.last
+        @protagonist.update_attributes(current_event_sequence: last_event.sequence)
+      end
+      @group
+    end
+
+    def perform_action key, metadata = {}
+
     end
 
   end
