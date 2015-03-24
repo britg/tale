@@ -1,19 +1,38 @@
 module Tale
   class Event
 
-    attr_accessor :description
+    attr_accessor :opts,
+                  :detail,
+                  :dialogue,
+                  :character_ref,
+                  :actions,
+                  :results
 
-    def initialize description, &block
-      @description = description
+    def initialize _opts = {}, &block
+      @opts = _opts
       instance_eval(&block)
     end
 
-    def detail text
-      puts "detail called from event"
+    def character ref
+      @character_ref = ref
     end
 
-    def action hash
-      puts "action called from event"
+    def detail text
+      @detail = text
+    end
+
+    def dialogue text
+      @dialogue = text
+    end
+
+    def action key, hash
+      @actions ||= []
+      @actions << { key: key }.merge(hash)
+    end
+
+    def result type, metadata = {}
+      @results ||= []
+      @results << { type: type }.merge(metadata)
     end
 
   end

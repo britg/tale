@@ -1,28 +1,40 @@
 module Tale
   class Chapter
 
-    attr_accessor :name,
-                  :events
-
-    def initialize name, &block
-      @name = name
-      instance_eval(&block)
+    def self.sequence int
+      @@sequence = int
     end
 
-    def to_s
-      @name
+    def self.at location_ref, &block
+      class_eval(&block)
     end
 
-    def location reference_slug
-      puts "location called"
+    def self.events
+      @@events
     end
 
-    def event description, &block
-      puts "event called"
-      @events ||= []
-      e = Tale::Event.new(description, &block)
-      @events << e
+    def self.event opts = {}, &block
+      @@events ||= []
+      e = Tale::Event.new(opts, &block)
+      @@events << e
       e
+    end
+
+    attr_accessor :character
+
+    # Character must have two properties:
+    # current_chapter_sequence
+    # current_event_sequence
+
+    def initialize _character
+      @character = _character
+      @current_event_index = 0
+    end
+
+    def next
+      @event = @@events[@current_event_index]
+      @current_event_index += 1
+      @event
     end
 
   end

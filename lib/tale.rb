@@ -4,15 +4,8 @@ require "tale/event"
 
 module Tale
 
-  def self.chapters
-    @@chapters
-  end
-
-  def self.chapter name, &block
-    @@chapters ||= []
-    @@chapters << Tale::Chapter.new(name, &block)
+  def self.chapter name, metadata = {}, &block
+    Tale::Chapter.new(name, metadata, &block)
   end
 
 end
-
-require "intro"
