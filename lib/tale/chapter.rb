@@ -1,81 +1,91 @@
 module Tale
   class Chapter
 
+    class << self
+      attr_accessor :branch_cache
+    end
+
     def self.sequence int
-      @@sequence = int
+      @sequence = int
+    end
+
+    def self.location
+      @location
     end
 
     def self.at location_ref, &block
+      @location = location_ref
       class_eval(&block)
     end
 
     def self.events
-      @@events
+      @events
+    end
+
+    def self.branch branch_name, &block
+      @current_branch = branch_name
+      class_eval(&block)
+      @current_branch = nil
     end
 
     def self.event opts = {}, &block
-      @@events ||= []
-      e = Tale::Event.new(opts, &block)
-      e.sequence = @@events.count
-      @@events << e
+      @events ||= {}
+      @branch_cache ||= {}
+      opts.merge!(branch: @current_branch)
+      e = Tale::Event.make(opts, &block)
+      @branch_cache[e.branch] ||= []
+      @branch_cache[e.branch] << e
+      e.sequence = @events.count
+      @events[e.sequence] = e
       e
     end
 
-    attr_accessor :protagonist
+    attr_accessor :current_event_sequence,
+                  :current_branch
 
-    # Protagonist must have two properties:
-    # current_chapter_sequence
-    # current_event_sequence
-
-    def initialize _protagonist
-      @protagonist = _protagonist
+    def initialize sequence = nil
+      @current_event_sequence = sequence||-1
     end
 
     def current_event
-      @@events[current_event_sequence]
+      return nil unless @current_event_sequence >= 0
+      self.class.events[@current_event_sequence]
     end
 
     def next_event
-      @@events[next_event_sequence]
-    end
-
-    def current_event_sequence
-      @protagonist.current_event_sequence || 0
+      self.class.events[next_event_sequence]
     end
 
     def next_event_sequence
-      current_event_sequence + 1
+      @current_event_sequence + 1
+    end
+
+    def next_event!
+      @next_event = next_event
+      @current_event_sequence += 1
+      @next_event
     end
 
     def next_event_group
-      return [] if current_event.has_actions?
+      return [] if current_event.present? && current_event.has_actions?
 
       @event_group = []
-      i = current_event_sequence
       loop do
-        i += 1
-        event = @@events[i]
-        @event_group << event
-
-        if event.has_actions?
-          break
-        end
+        @next_event = next_event!
+        @event_group << @next_event
+        break if @next_event.has_actions?
       end
 
       @event_group
     end
 
-    def proceed!
-      @group = next_event_group
-      if @group.any?
-        last_event = @group.last
-        @protagonist.update_attributes(current_event_sequence: last_event.sequence)
-      end
-      @group
+    def step!
+      @current_event_sequence += 1
     end
 
-    def perform_action key, metadata = {}
-
+    def choose! key, metadata = {}
+      # temp
+      step!
     end
 
   end

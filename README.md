@@ -1,8 +1,6 @@
 # Tale
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/tale`. To experiment with that code, run `bin/console` for an interactive prompt.
-
-TODO: Delete this and the text above, and describe your gem
+A DSL for writing and navigating stories. Very much still in the 'discovery' phase of development.
 
 ## Installation
 
@@ -22,7 +20,94 @@ Or install it yourself as:
 
 ## Usage
 
-TODO: Write usage instructions here
+Write chapters consisting of events. Events can have take actions and lead to consequences.
+
+```ruby
+
+class TheTavern < Tale::Chapter
+
+  location :tavern do
+
+    event do
+      detail "The tavern ahead looks like a pile of wood and stone blew into place in the last storm."
+    end
+
+    event do
+      character :protagonist
+      dialogue "Guess this is the place..."
+      action :open_door, "Open the the door"
+    end
+
+    event do
+      character :tavernkeep
+      dialogue "Welcome, stranger. What'll you have?"
+      action :ale, "Ale"
+      action :mead, "Mead"
+    end
+
+    event from: :ale do
+      detail "Bleh, the ale is stale and hot..."
+      consequence protagonist: :defend, :tavern_ale
+    end
+
+    event from: :mead do
+      detail "Mmmm, the mead is sweet and tasty."
+      consequence protagonist: :heal, :tavern_mead
+    end
+
+  end
+
+end
+```
+
+Define your protagonist, locations and other characters, objects
+
+```ruby
+
+class Player
+  include Tavern::Protagonist
+
+  # These methods implementations are where you
+  # customize your game
+
+  def defend params
+    # ... implementation is up to you from here
+  end
+
+  def heal params
+    # ... implementation is up to you from here
+  end
+
+end
+
+```
+
+API for navigating chapters.
+
+```ruby
+  player = Player.new
+  intro = Intro.new(player)
+
+  intro.current_event
+  # The tavern ahead looks like a pile of wood and stone blew into place in the last storm.
+
+  intro.step!
+
+  intro.current_event
+  # Guess this is the place...
+  # actions: "Open the door"
+
+  intro.choose! :open_door
+  intro.current_event
+  # Tavernkeep: "Welcome, stranger. What'll you have?"
+  # actions: "Ale" "Mead"
+
+  intro.choose! :ale
+  ...
+
+```
+
+
 
 ## Development
 

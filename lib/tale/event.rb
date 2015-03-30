@@ -6,42 +6,65 @@ module Tale
                   :dialogue,
                   :character_ref,
                   :actions,
-                  :results,
-                  :sequence
+                  :consequences,
+                  :sequence,
+                  :branch
 
-    def initialize _opts = {}, &block
-      @opts = _opts
-      @actions = []
-      @results = []
-      instance_eval(&block)
+    def self.make opts, &block
+      reset!
+      class_eval(&block)
+      e = Tale::Event.new(opts)
+      e.character_ref = @character_ref
+      e.detail = @detail
+      e.dialogue = @dialogue
+      e.actions = @actions
+      e.consequences = @consequences
+      return e
     end
 
-    def character ref
+    def self.reset!
+      @actions = []
+      @consequences = []
+      @character_ref = nil
+      @detail = nil
+      @dialogue = nil
+    end
+
+    def self.character ref
       @character_ref = ref
     end
 
-    def detail text
+    def self.detail text
       @detail = text
     end
 
-    def dialogue text
+    def self.dialogue text
       @dialogue = text
     end
 
-    def action key, hash
+    def self.action key, hash
       @actions << { key: key }.merge(hash)
     end
 
-    def result type, metadata = {}
-      @results << { type: type }.merge(metadata)
+    def self.consequence type, metadata = {}
+      @consequences << { type: type }.merge(metadata)
+    end
+
+    def initialize _opts
+      @opts = _opts
+      @branch = opts[:branch]
+    end
+
+    def actions
+      @actions || []
     end
 
     def no_actions?
-      @actions.empty?
+      actions.empty?
     end
 
     def has_actions?
-      @actions.any?
+      actions.any?
     end
 
     def action_required?

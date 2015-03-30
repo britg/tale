@@ -1,11 +1,11 @@
-require "tale/version"
-require "tale/chapter"
-require "tale/event"
+if defined?(Rails)
+  require "tale/engine"
+else
+  require "tale/version"
+  require "tale/chapter"
+  require "tale/event"
+end
 
 module Tale
-
-  def self.chapter name, metadata = {}, &block
-    Tale::Chapter.new(name, metadata, &block)
-  end
 
 end
