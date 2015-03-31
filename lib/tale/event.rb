@@ -68,7 +68,7 @@ module Tale
     end
 
     def action_required?
-      has_actions?
+      actions.count > 1
     end
 
   end

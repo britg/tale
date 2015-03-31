@@ -52,12 +52,50 @@ module Tale
       self.class.events[@current_event_sequence]
     end
 
-    def next_event
-      self.class.events[next_event_sequence]
+    def action_available?
+      current_event.present? && current_event.has_actions?
     end
 
-    def next_event_sequence
-      @current_event_sequence + 1
+    def action_required?
+      current_event.present? && current_event.action_required?
+    end
+
+    def next_event
+      if @current_branch.present? && branch_exists?(@current_branch)
+        next_branch_event
+      else
+        raise "Action required" if action_required?
+        next_non_branch_event
+      end
+    end
+
+    def branch_exists? branch_name
+      self.class.branch_cache[branch_name].present?
+    end
+
+    def branch_events
+      self.class.branch_cache[@current_branch]
+    end
+
+    def next_branch_event
+      branch_event = branch_events[@current_event_sequence + 1]
+      if branch_event.nil?
+        # leave branch
+        @current_branch = nil
+        return next_event
+      else
+        return branch_event
+      end
+    end
+
+    def next_non_branch_event
+      loop do
+        this_event = self.class.events[@current_event_sequence + 1]
+        return if this_event.nil?
+        if this_event.branch.nil?
+          return this_event
+        end
+      end
     end
 
     def next_event!
@@ -79,13 +117,16 @@ module Tale
       @event_group
     end
 
-    def step!
-      @current_event_sequence += 1
-    end
-
-    def choose! key, metadata = {}
-      # temp
-      step!
+    def take_action! key, metadata = {}
+      branch_name = key.to_sym
+      if branch_exists?(branch_name)
+        @current_branch = branch_name
+        @event = branch_events.first
+        @current_event_sequence = @event.sequence
+        @event
+      else
+        next_event
+      end
     end
 
   end
