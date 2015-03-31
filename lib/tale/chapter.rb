@@ -105,7 +105,7 @@ module Tale
     end
 
     def next_event_group
-      return [] if current_event.present? && current_event.has_actions?
+      return [] if action_required?
 
       @event_group = []
       loop do
@@ -123,9 +123,9 @@ module Tale
         @current_branch = branch_name
         @event = branch_events.first
         @current_event_sequence = @event.sequence
-        @event
+        @event | next_event_group
       else
-        next_event
+        next_event_group
       end
     end
 
