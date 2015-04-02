@@ -2,73 +2,40 @@ module Tale
   class Event
 
     attr_accessor :opts,
+                  :sequence,
                   :detail,
                   :dialogue,
                   :character_ref,
                   :actions,
-                  :consequences,
-                  :sequence,
-                  :branch
-
-    def self.make opts, &block
-      reset!
-      class_eval(&block)
-      e = Tale::Event.new(opts)
-      e.character_ref = @character_ref
-      e.detail = @detail
-      e.dialogue = @dialogue
-      e.actions = @actions
-      e.consequences = @consequences
-      return e
-    end
-
-    def self.reset!
-      @actions = []
-      @consequences = []
-      @character_ref = nil
-      @detail = nil
-      @dialogue = nil
-    end
-
-    def self.character ref
-      @character_ref = ref
-    end
-
-    def self.detail text
-      @detail = text
-    end
-
-    def self.dialogue text
-      @dialogue = text
-    end
-
-    def self.action key, hash
-      @actions << { key: key }.merge(hash)
-    end
-
-    def self.consequence type, metadata = {}
-      @consequences << { type: type }.merge(metadata)
-    end
+                  :results,
+                  :branch_name
 
     def initialize _opts
       @opts = _opts
-      @branch = opts[:branch]
-    end
-
-    def actions
-      @actions || []
+      @sequence = @opts[:sequence]
+      @branch_name = @opts[:branch_name]
+      @actions = {}
+      @results = {}
     end
 
     def no_actions?
-      actions.empty?
+      @actions.empty?
     end
 
     def has_actions?
-      actions.any?
+      @actions.any?
     end
 
     def action_required?
-      actions.count > 1
+      @actions.count > 1
+    end
+
+    def action_valid? key
+      @actions[key].present?
+    end
+
+    def available_action_keys
+      @actions.keys
     end
 
   end
