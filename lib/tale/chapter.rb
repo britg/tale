@@ -1,6 +1,8 @@
 module Tale
   class Chapter
 
+    EVENT_START_INDEX = 1
+
     class << self
       attr_accessor :branches, :parse_sequence
     end
@@ -43,7 +45,7 @@ module Tale
         event = branch.events[seq]
         return event if event.present?
       end
-      raise "Event not found"
+      raise "Event not found: seq #{seq}"
     end
 
   end

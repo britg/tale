@@ -57,6 +57,7 @@ module Tale
 
     def seq int
       if int > max_sequence
+        puts "Out of branch bounds: #{name} #{int} / #{max_sequence}. Most likely this chapter did not end with an action!"
         return exit_branch
         # raise "Out of branch bounds: #{name} #{int} / #{max_sequence}"
       end
