@@ -5,10 +5,11 @@ module Tale
                   :sequence,
                   :detail,
                   :dialogue,
-                  :character_ref,
+                  :agent_name,
                   :actions,
                   :results,
-                  :branch_name
+                  :branch_name,
+                  :transition
 
     def initialize _opts
       @opts = _opts
@@ -36,6 +37,10 @@ module Tale
 
     def available_action_keys
       @actions.keys
+    end
+
+    def has_results?
+      @results.any?
     end
 
   end

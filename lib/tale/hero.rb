@@ -1,10 +1,13 @@
 module Tale
-  class Hero
+  class Hero < Agent
 
     attr_accessor :chapter,
                   :current_sequence
 
+    name :hero
+
     def initialize _chapter, _sequence = 1
+      super()
       @chapter = _chapter
       @current_sequence = _sequence
       @current_event = @chapter.find_event(@current_sequence)

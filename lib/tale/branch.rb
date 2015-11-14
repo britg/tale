@@ -31,8 +31,8 @@ module Tale
       @buidling_event = nil
     end
 
-    def character ref
-      @building_event.character_ref = ref
+    def agent name
+      @building_event.agent_name = name.to_sym
     end
 
     def detail text
